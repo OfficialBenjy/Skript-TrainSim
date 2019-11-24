@@ -1,0 +1,784 @@
+on join:
+	set {trainsim.%player%.running} to false
+command /trainsim [<text>] [<text>]:
+	trigger:
+		if arg-1 is "admin":
+			if player has permission "trainsim.admin":
+				if arg-2 is "reload":
+					set {trainsim.loop} to false
+					wait 10 ticks
+					execute player command "sk reload trainsim"
+		else if arg-1 is "quit":
+			set {trainsim.%player%.running} to false
+			set slot 0 of player to {trainsim.%player%.hotbar::1}
+			set slot 1 of player to {trainsim.%player%.hotbar::2}
+			set slot 2 of player to {trainsim.%player%.hotbar::3}
+			set slot 3 of player to {trainsim.%player%.hotbar::4}
+			set slot 4 of player to {trainsim.%player%.hotbar::5}
+			set slot 5 of player to {trainsim.%player%.hotbar::6}
+			set slot 6 of player to {trainsim.%player%.hotbar::7}
+			set slot 7 of player to {trainsim.%player%.hotbar::8}
+			set slot 8 of player to command block named "Creative"
+			set {trainsim.%player%.speed} to 0
+			set {trainsim.%player%.throttle} to 0
+			stop
+		else if arg-1 is not set:
+			open chest inventory with 3 rows named "Train Simulator" to player
+			set {trainsim.%player%.loop} to 0
+			loop 9 times:
+				set slot {trainsim.%player%.loop} of player's current inventory to Black Glass Pane named "&8&l[&2&lIBHTech&8&l]" with lore "TrainSim Ver: 5alpha"
+				add 1 to {trainsim.%player%.loop}
+
+			set {trainsim.%player%.loop} to 18
+			loop 9 times:
+				set slot {trainsim.%player%.loop} of player's current inventory to Black Glass Pane named "&8&l[&2&lIBHTech&8&l]" with lore "TrainSim Ver: 5alpha"
+				add 1 to {trainsim.%player%.loop}
+
+			set slot 10 of player's current inventory to minecart named "&cPlayyyyyy."
+		else if arg-1 is "play":
+			if {trainsim.%player%.running} is true:
+				send "You are already in Train Sim mode"
+				stop
+			set {trainsim.%player%.distance} to 0
+			set {trainsim.%player%.train} to arg-2
+			set {trainsim.%player%.doors.right} to false
+			set {trainsim.%player%.doors.left} to false
+			execute player command "train name %arg-2%"
+			send "You are now in Train Sim mode"
+			clear {trainsim.%player%.hotbar::*}
+			set {trainsim.%player%.speed} to 0
+			add slot 0 of player to {trainsim.%player%.hotbar::*}
+			add slot 1 of player to {trainsim.%player%.hotbar::*}
+			add slot 2 of player to {trainsim.%player%.hotbar::*}
+			add slot 3 of player to {trainsim.%player%.hotbar::*}
+			add slot 4 of player to {trainsim.%player%.hotbar::*}
+			add slot 5 of player to {trainsim.%player%.hotbar::*}
+			add slot 6 of player to {trainsim.%player%.hotbar::*}
+			add slot 7 of player to {trainsim.%player%.hotbar::*}
+			add slot 8 of player to {trainsim.%player%.hotbar::*}
+			set {trainsim.%player%.running} to true
+			set slot 0 of player to Gray Glass Pane named "&8&l[&2&lIBHTech&8&l]"
+			set slot 1 of player to Lime Concrete named "&2Throttle Up"
+			set slot 2 of player to Red Concrete named "&4Throttle Down"
+			set slot 3 of player to Gray Glass Pane named "&8&l[&2&lIBHTech&8&l]"
+			set slot 4 of player to Black Concrete named "AWS Aknoledge"
+			set slot 5 of player to Gray Glass Pane named "&8&l[&2&lIBHTech&8&l]"
+			set slot 6 of player to Iron Door named "&eOpen Doors"
+			set slot 7 of player to Emerald named "Set Direction (The direction you are facing)"
+			set slot 8 of player to Detector Rail named "Settings"
+			set {trainsim.%player%.aws} to true
+
+
+on inventory click:
+	if name of event-inventory is "Train Simulator":
+		cancel event
+		if index of event-slot is 10:
+			close player's inventory
+			open anvil gui named "NewTrain" to player with default text "New Train Name" and with item Minecart
+
+on quit:
+	if {trainsim.%player%.running} is true:
+		execute player command "train destroy"
+		set {trainsim.%player%.running} to false
+		set slot 0 of player to {trainsim.%player%.hotbar::1}
+		set slot 1 of player to {trainsim.%player%.hotbar::2}
+		set slot 2 of player to {trainsim.%player%.hotbar::3}
+		set slot 3 of player to {trainsim.%player%.hotbar::4}
+		set slot 4 of player to {trainsim.%player%.hotbar::5}
+		set slot 5 of player to {trainsim.%player%.hotbar::6}
+		set slot 6 of player to {trainsim.%player%.hotbar::7}
+		set slot 7 of player to {trainsim.%player%.hotbar::8}
+		set {trainsim.%player%.speed} to 0
+on death:
+	if {trainsim.%player%.running} is true:
+		execute player command "train destroy"
+		set {trainsim.%player%.running} to false
+		set slot 0 of player to {trainsim.%player%.hotbar::1}
+		set slot 1 of player to {trainsim.%player%.hotbar::2}
+		set slot 2 of player to {trainsim.%player%.hotbar::3}
+		set slot 3 of player to {trainsim.%player%.hotbar::4}
+		set slot 4 of player to {trainsim.%player%.hotbar::5}
+		set slot 5 of player to {trainsim.%player%.hotbar::6}
+		set slot 6 of player to {trainsim.%player%.hotbar::7}
+		set slot 7 of player to {trainsim.%player%.hotbar::8}
+		set {trainsim.%player%.speed} to 0
+		send "Your train was destroyed because you died"
+on any move:
+	if world of player is "VictoriaLine":
+		if gamemode of player is survival:
+			if y-coordinate of player is 12:
+				set health of player to 0
+				broadcast "%player% decided to track walk"
+		if gamemode of player is adventure:
+			if y-coordinate of player is 12:
+				set health of player to 0
+				broadcast "%player% decided to track walk"
+
+on close anvil gui named "NewTrain":
+	set block at location -68, 6, -64 in world "VictoriaLine" to Redstone block
+	wait 0.5 seconds
+	set block at location -68, 6, -64 in world "VictoriaLine" to Black Concrete
+	wait 3 seconds
+	teleport player to location at -47, 14, -61 in world "VictoriaLine"
+	set gamemode of player to Adventure
+	wait 0.5 seconds
+	set health of player to 20
+	while player is not riding a minecart:
+		wait 0.1 seconds
+	if {trainsim.%player%.running} is true:
+		send "You are already in Train Sim mode"
+		stop
+	set {trainsim.%player%.distance} to 0
+	set {trainsim.%player%.train} to event-text
+	set {trainsim.%player%.doors.right} to false
+	set {trainsim.%player%.doors.left} to false
+	execute player command "train name %event-text%"
+	send "You are now in Train Sim mode"
+	clear {trainsim.%player%.hotbar::*}
+	set {trainsim.%player%.speed} to 0
+	add slot 0 of player to {trainsim.%player%.hotbar::*}
+	add slot 1 of player to {trainsim.%player%.hotbar::*}
+	add slot 2 of player to {trainsim.%player%.hotbar::*}
+	add slot 3 of player to {trainsim.%player%.hotbar::*}
+	add slot 4 of player to {trainsim.%player%.hotbar::*}
+	add slot 5 of player to {trainsim.%player%.hotbar::*}
+	add slot 6 of player to {trainsim.%player%.hotbar::*}
+	add slot 7 of player to {trainsim.%player%.hotbar::*}
+	add slot 8 of player to {trainsim.%player%.hotbar::*}
+	set {trainsim.%player%.running} to true
+	set slot 0 of player to Gray Glass Pane named "&8&l[&2&lIBHTech&8&l]"
+	set slot 1 of player to Lime Concrete named "&2Throttle Up"
+	set slot 2 of player to Red Concrete named "&4Throttle Down"
+	set slot 3 of player to Gray Glass Pane named "&8&l[&2&lIBHTech&8&l]"
+	set slot 4 of player to Black Concrete named "AWS Aknoledge"
+	set slot 5 of player to Gray Glass Pane named "&8&l[&2&lIBHTech&8&l]"
+	set slot 6 of player to Iron Door named "&eOpen Doors"
+	set slot 7 of player to Emerald named "Set Direction (The direction you are facing)"
+	set slot 8 of player to Detector Rail named "Destination: (Not Set)"
+	set {trainsim.%player%.aws} to true	
+
+on right click:
+	if {trainsim.%player%.running} is true:
+		if current hotbar slot of player is 8:
+			open chest inventory with 1 rows named "Train Settings" to player
+			set slot 0 of player's current inventory to minecart named "Set Destination: (%{trainsim.%player%.dest}%)"
+			set slot 8 of player's current inventory to Red Concrete named "&cQuit Train Sim"
+			set slot 1 of player's current inventory to Compass named "Automatic Train Operation"
+
+on inventory click:
+	if name of event-inventory is "ATO.":
+		cancel event
+		if {trainsim.%player%.doors.flip} is true:
+			if {trainsim.%player%.doors.left} is true:
+				set {trainsim.%player%.doors.left} to false
+				set slot 1 of player's current inventory to Red Concrete named "Left Doors (&4Closed)"
+				play sound "minecraft:ann.standclear" with volume 180 at location of player
+				wait 4.4 seconds
+				play sound "minecraft:vlf.doorclose" with volume 180 at location of player
+				wait 1.7 seconds
+				execute player command "train animate Door1 -1"
+			if {trainsim.%player%.doors.right} is true:
+				set {trainsim.%player%.doors.right} to false
+				set slot 3 of player's current inventory to Red Concrete named "Right Doors (&4Closed)"
+				play sound "minecraft:ann.standclear" with volume 180 at location of player
+				wait 4.4 seconds
+				play sound "minecraft:vlf.doorclose" with volume 180 at location of player 
+				wait 1.7 seconds
+				execute player command "train animate Door0 -1"
+		else if {trainsim.%player%.doors.flip} is false:
+			if {trainsim.%player%.doors.left} is true:
+				set {trainsim.%player%.doors.left} to false
+				set slot 1 of player's current inventory to Red Concrete named "Left Doors (&4Closed)"
+				play sound "minecraft:ann.standclear" with volume 180 at location of player
+				wait 4.4 seconds
+				play sound "minecraft:vlf.doorclose" with volume 180 at location of player 
+				wait 1.7 seconds
+				execute player command "train animate Door0 -1"
+			if {trainsim.%player%.doors.right} is true:
+				set {trainsim.%player%.doors.right} to false
+				set slot 3 of player's current inventory to Red Concrete named "Right Doors (&4Closed)"
+				play sound "minecraft:ann.standclear" with volume 180 at location of player
+				wait 4.4 seconds
+				play sound "minecraft:vlf.doorclose" with volume 180 at location of player 
+				wait 1.7 seconds
+				execute player command "train animate Door1 -1"
+
+		execute player command "atotest %name of event-item% r"
+
+	if name of event-inventory is "Train Settings":
+		cancel event
+		if index of event-slot is 1:
+			open chest inventory with 6 rows named "ATO." to player
+			set {trainsim.%player%.loop} to 0
+			loop {ATO::*}:
+				set slot {trainsim.%player%.loop} of player's current inventory to minecart named "%loop-value%"
+				add 1 to {trainsim.%player%.loop}
+		if index of event-slot is 0:
+			open chest inventory with 6 rows named "Destinations:" to player
+			set slot 0 of player's current inventory to minecart named "Walthamstow Central"
+			set slot 1 of player's current inventory to minecart named "Kings Cross St Pancras"
+		if index of event-slot is 8:
+			close player's inventory
+			execute player command "trainsim quit"
+			execute player command "train destroy"
+			set gamemode of player to Creative
+			teleport player to location at 0, 10, 0 in world "VictoriaLine"
+			execute player command "hub"
+	if name of event-inventory is "Destinations:":
+		if index of event-slot is 0:
+			open chest inventory with 1 rows named "Platform at %name of event-item%" to player
+			set slot 3 of player's current inventory to minecart named "Platform 1"
+			set slot 5 of player's current inventory to minecart named "Platform 2"
+		if index of event-slot is 1:
+			open chest inventory with 1 rows named "Platform at %name of event-item%" to player
+			set slot 3 of player's current inventory to minecart named "Eastbound"
+			set slot 5 of player's current inventory to minecart named "Westbound"
+
+on inventory click:
+	if name of event-inventory contains "Platform":
+		cancel event
+		if name of event-inventory contains "Walthamstow":
+			set slot 8 of player to Detector Rail named "Destination: Walthamstow Central"
+			set {trainsim.%player%.dest} to "Walthamstow Central"
+			if index of event-slot is 3:
+				execute player command "train dest WalthamstowP1"
+			if index of event-slot is 5:
+				execute player command "train dest WalthamstowP2"
+
+		if name of event-inventory contains "Kings Cross":
+			set slot 8 of player to Detector Rail named "Destination: Blackhorse Road"
+			set {trainsim.%player%.dest} to "Kings Cross"
+			if index of event-slot is 3:
+				execute player command "train dest KingsXP1"
+			if index of event-slot is 5:
+				execute player command "train dest KingsXP2"
+		close player's inventory
+
+
+on right click:
+	if name of event-item is "what":
+		send "%event-block%"
+on block place:
+	if {trainsim.%player%.running} is true:
+		cancel event
+
+on right click:
+	if event-item is Yellow Concrete named "Aknoledge Alarm":
+		cancel event
+		set {trainsim.%player%.aws} to false
+		wait 0.3 seconds
+		play sound "minecraft:aws.bing" with volume 100000 at location of player 
+		set slot 4 of player to Black Concrete named "AWS Aknoledge"
+	if event-item is Emerald named "Set Direction (The direction you are facing)":
+		execute player command "train launch 10"
+		send player title "&l&bYou have switched direction" for 2 seconds
+on drop:
+	if {trainsim.%player%.aws} is true:
+		cancel event
+		set {trainsim.%player%.aws} to false
+		wait 0.3 seconds
+		play sound "minecraft:aws.bing" at location of player 
+		set slot 4 of player to Black Concrete named "AWS Aknoledge"
+
+on load:
+	set {trainsim.loop} to true
+on load:
+	wait 1 tick
+	while {trainsim.loop} is true:
+		loop all players:
+			if {trainsim.%loop-player%.aws} is true:
+				set slot 4 of loop-player to Yellow Concrete named "Aknoledge Alarm"
+				play sound "minecraft:aws.ping" with volume 100000 at location of loop-value for loop-value
+			if {trainsim.%loop-player%.running} is true:
+				if {trainsim.%loop-player%.throttle} is less than 0:
+					set {trainsim.%loop-player%.throttle.d} to "B%{trainsim.%loop-player%.throttle} * -1%"
+				else if {trainsim.%loop-player%.throttle} is 0:
+					set {trainsim.%loop-player%.throttle.d} to "N"
+				else:
+					set {trainsim.%loop-player%.throttle.d} to "P%{trainsim.%loop-player%.throttle}%"
+				if loop-player is "ItzBenjyHere":
+					set {tps::*} to tps
+					set action bar of loop-player to "Notch: %{trainsim.%loop-player%.throttle.d}% Speed: %({trainsim.%loop-player%.speed} * 72)%KM/H TPS: %{tps::1}% Debug Speed: %{trainsim.%loop-player%.speed}% Distance: %distance between location of loop-player and {ATO::location::%{trainsim.%loop-player%.distance}%}% bbayu speed: %{trainsim.%loop-player%.speed} * 72%"
+				else:
+					set action bar of loop-player to "Notch: %{trainsim.%loop-player%.throttle.d}% Speed: %({trainsim.%loop-player%.speed} * 72)%KM/H"
+			if {trainsim.%loop-player%.throttle} is not set:
+				set {trainsim.%loop-player%.throttle} to 0
+		wait 1 tick
+
+on load:
+	wait 1 tick
+	while {trainsim.loop} is true:
+		loop all players:
+			if {trainsim.%loop-player%.running} is true:
+				if {trainsim.%loop-player%.throttle} is 4:
+					add 0.008 to {trainsim.%loop-player%.speed}
+				if {trainsim.%loop-player%.throttle} is 3:
+					add 0.006 to {trainsim.%loop-player%.speed}
+				if {trainsim.%loop-player%.throttle} is 2:
+					add 0.004 to {trainsim.%loop-player%.speed}
+				if {trainsim.%loop-player%.throttle} is 1:
+					add 0.002 to {trainsim.%loop-player%.speed}
+				if {trainsim.%loop-player%.throttle} is 0:
+					remove 0.0001 from {trainsim.%loop-player%.speed}
+				if {trainsim.%loop-player%.throttle} is -1:
+					remove 0.0015 from {trainsim.%loop-player%.speed}
+				if {trainsim.%loop-player%.throttle} is -2:
+					remove 0.003 from {trainsim.%loop-player%.speed}
+				if {trainsim.%loop-player%.throttle} is -3:
+					remove 0.0045 from {trainsim.%loop-player%.speed}
+				if {trainsim.%loop-player%.throttle} is -4:
+					remove 0.006 from {trainsim.%loop-player%.speed}
+				if {trainsim.%loop-player%.throttle} is -5:
+					remove 0.0075 from {trainsim.%loop-player%.speed}
+				if {trainsim.%loop-player%.throttle} is -6:
+					remove 0.009 from {trainsim.%loop-player%.speed}
+				if {trainsim.%loop-player%.throttle} is less than 1:
+					if {trainsim.%loop-player%.speed} is less than 0.001:
+						set {trainsim.%loop-player%.speed} to 0
+						make loop-player execute command "power %{trainsim.%loop-player%.train}% %{trainsim.%loop-player%.speed}% %round x-coordinate of loop-player% %round y-coordinate of loop-player% %round z-coordinate of loop-player% %world of loop-player%"
+		wait 3 ticks
+
+on load:
+	wait 1 tick
+	while {trainsim.loop} is true:
+		loop all players:
+			if {trainsim.%loop-player%.running} is true:
+				if {trainsim.%loop-player%.speed} is more than 0.0001:
+					add 1 to {trainsim.%loop-player%.sound}
+					if {trainsim.%loop-player%.sound} is not set:
+						set {trainsim.%loop-player%.sound} to 0
+					if {trainsim.%loop-player%.sound} is more than 14:
+						set {trainsim.%loop-player%.sound} to 0
+						#play sound "minecraft:minecart.inside" with volume 1000000000000 at location of loop-value for loop-value
+
+		wait 1 second
+
+on load:
+	wait 1 tick
+	while {trainsim.loop} is true:
+		loop all players:
+			if {trainsim.%loop-player%.doors.left} is true:
+				set {trainsim.%loop-player%.throttle} to -6
+			else if {trainsim.%loop-player%.doors.right} is true:
+				set {trainsim.%loop-player%.throttle} to -6
+		wait 1 second
+
+
+on load:
+	wait 1 tick
+	while {trainsim.loop} is true:
+		loop all players:
+			if {trainsim.%loop-player%.running} is true:
+				if {trainsim.%loop-player%.speed} is more than 0.0001:
+					if {trainsim.%loop-player%.throttle} is not 0:
+						#if {trainsim.%loop-player%.speed} is more than 0.5:
+						#	play sound "minecraft:first" with pitch {trainsim.%loop-player%.speed} at location of loop-value for loop-value
+						#else:
+						#	play sound "minecraft:last" with pitch {trainsim.%loop-player%.speed} + 1 at location of loop-value for loop-value
+						if {trainsim.%loop-player%.speed} is less than 0.99:
+							play sound "minecraft:first" with volume 180 and pitch (({trainsim.%loop-player%.speed}  * 15.5) / 10) + 0.5 at location of loop-player
+						#if {trainsim.%loop-player%.speed} is less than 0.4:
+						#	play sound "minecraft:second" at location of loop-value for loop-value
+				if {trainsim.%loop-player%.speed} is not set:
+					set {trainsim.%loop-player%.speed} to 0
+				if {trainsim.%loop-player%.speed} is less than 0:
+					set {trainsim.%loop-player%.speed} to 0
+		wait 1 tick
+on load:
+	wait 1 tick
+	while {trainsim.loop} is true:
+		loop all players:
+			if {trainsim.%loop-player%.running} is true:
+				if {trainsim.%loop-player%.tick} is not set:
+					set {trainsim.%loop-player%.tick} to 0
+
+				if loop-player is online:
+					if {trainsim.%loop-player%.speed} is more than 0.0001:
+						#make loop-player execute command "setblock ~ ~-2 ~ minecraft:sign{Text1:""{\""text\"":\""[train %trainsim.%loop-player%.train%]\""}"",Text2:""{\""text\"":\""property\""}"",Text3:""{\""text\"":\""maxspeed\""}"",Text4:""{\""text\"":\""Dust\""}""}"
+						#"
+				#		set line 1 of block at location of loop-player to "[train %{trainsim.%loop-player%.train}%]"
+				#		set line 4 of block at location of loop-player to "%{trainsim.%loop-player%.speed}%"
+				#		wait 1 tick
+				#		set block 2 down 1 east location of loop-player to Redstone Torch
+				#		wait 1 tick
+				#		set block 2 down 1 east location of loop-player to air
+				#		set block 2 down location of loop-player to air
+					#	make loop-player execute command "train maxspeed %{trainsim.%loop-player%.speed}%"
+						make loop-player execute command "power %{trainsim.%loop-player%.train}% %{trainsim.%loop-player%.speed}% %round x-coordinate of loop-player% %round y-coordinate of loop-player% %round z-coordinate of loop-player% %world of loop-player%"
+		wait 3 ticks
+
+
+
+
+on right click:
+	if {trainsim.%player%.running} is true:
+		if current hotbar slot of player is 1:
+			if {trainsim.%player%.throttle} is more than 3:
+				stop
+			else:
+				add 1 to {trainsim.%player%.throttle}
+		if current hotbar slot of player is 2:
+			if {trainsim.%player%.throttle} is less than -5:
+				stop
+			else:
+				remove 1 from {trainsim.%player%.throttle}
+		if current hotbar slot of player is 6:
+			if {trainsim.%player%.doors.flip} is not set:
+				set {trainsim.%player%.doors.flip} to false
+			open chest inventory with 1 row named "Train Doors" to player
+			if {trainsim.%player%.doors.left} is not set:
+
+				set {trainsim.%player%.doors.left} to false
+
+			if {trainsim.%player%.doors.right} is not set:
+				set {trainsim.%player%.doors.right} to false
+
+			if {trainsim.%player%.doors.left} is false:
+				set slot 1 of player's current inventory to Red Concrete named "Left Doors (&4Closed)"
+			else:
+				set slot 1 of player's current inventory to Green Concrete named "Left Doors (&2Opened)"
+
+			if {trainsim.%player%.doors.right} is false:
+				set slot 3 of player's current inventory to Red Concrete named "Right Doors (&4Closed)"
+			else:
+				set slot 3 of player's current inventory to Green Concrete named "Right Doors (&2Opened)"
+
+			if {trainsim.%player%.doors.flip} is true:
+				set slot 7 of player's current inventory to Green Concrete named "Flip Doors" with lore "Use this if the doors open on the wrong side"
+			else if {trainsim.%player%.doors.flip} is false:
+				set slot 7 of player's current inventory to Red Concrete named "Flip Doors" with lore "Use this if the doors open on the wrong side"
+
+
+on inventory click:
+	if name of event-inventory is "Train Doors":
+		cancel event
+		if {trainsim.%player%.doors.flip} is true:
+			if index of event-slot is 7:
+				set {trainsim.%player%.doors.flip} to false
+				set slot 7 of player's current inventory to Red Concrete named "Flip Doors" with lore "Use this if the doors open on the wrong side"
+			if index of event-slot is 1:
+				if {trainsim.%player%.doors.left} is false:
+					set {trainsim.%player%.doors.left} to true
+					set slot 1 of player's current inventory to Green Concrete named "Left Doors (&2Opened)"
+					play sound "minecraft:vlf.dooropen" with volume 180 at location of player 
+					wait 0.4 seconds
+					execute player command "train animate Door1 1"
+				else:
+					set {trainsim.%player%.doors.left} to false
+					set slot 1 of player's current inventory to Red Concrete named "Left Doors (&4Closed)"
+					play sound "minecraft:ann.standclear" with volume 180 at location of player
+					wait 4.4 seconds
+					play sound "minecraft:vlf.doorclose" with volume 180 at location of player
+					wait 1.7 seconds
+					execute player command "train animate Door1 -1"
+			if index of event-slot is 3:
+				if {trainsim.%player%.doors.right} is false:
+					set {trainsim.%player%.doors.right} to true
+					set slot 3 of player's current inventory to Green Concrete named "Right Doors (&2Opened)"
+					play sound "minecraft:vlf.dooropen" with volume 180 at location of player 
+					wait 0.4 seconds
+					execute player command "train animate Door0 1"
+				else:
+					set {trainsim.%player%.doors.right} to false
+					set slot 3 of player's current inventory to Red Concrete named "Right Doors (&4Closed)"
+					play sound "minecraft:ann.standclear" with volume 180 at location of player
+					wait 4.4 seconds
+					play sound "minecraft:vlf.doorclose" with volume 180 at location of player 
+					wait 1.7 seconds
+					execute player command "train animate Door0 -1"
+
+		else if {trainsim.%player%.doors.flip} is false:
+			if index of event-slot is 7:
+				set {trainsim.%player%.doors.flip} to true
+				set slot 7 of player's current inventory to Green Concrete named "Flip Doors" with lore "Use this if the doors open on the wrong side"
+			if index of event-slot is 1:
+				if {trainsim.%player%.doors.left} is false:
+					set {trainsim.%player%.doors.left} to true
+					set slot 1 of player's current inventory to Green Concrete named "Left Doors (&2Opened)"
+					play sound "minecraft:vlf.dooropen" with volume 180 at location of player 
+					wait 0.4 seconds
+					execute player command "train animate Door0 1"
+				else:
+					set {trainsim.%player%.doors.left} to false
+					set slot 1 of player's current inventory to Red Concrete named "Left Doors (&4Closed)"
+					play sound "minecraft:ann.standclear" with volume 180 at location of player
+					wait 4.4 seconds
+					play sound "minecraft:vlf.doorclose" with volume 180 at location of player 
+					wait 1.7 seconds
+					execute player command "train animate Door0 -1"
+			if index of event-slot is 3:
+				if {trainsim.%player%.doors.right} is false:
+					set {trainsim.%player%.doors.right} to true
+					set slot 3 of player's current inventory to Green Concrete named "Right Doors (&2Opened)"
+					play sound "minecraft:vlf.dooropen" with volume 180 at location of player 
+					wait 0.4 seconds
+					execute player command "train animate Door1 1"
+				else:
+					set {trainsim.%player%.doors.right} to false
+					set slot 3 of player's current inventory to Red Concrete named "Right Doors (&4Closed)"
+					play sound "minecraft:ann.standclear" with volume 180 at location of player
+					wait 4.4 seconds
+					play sound "minecraft:vlf.doorclose" with volume 180 at location of player 
+					wait 1.7 seconds
+					execute player command "train animate Door1 -1"
+
+command /throttletest [<number>]:
+	trigger:
+		#set block at location of player to sign
+		execute player command "setblock ~ ~ ~ minecraft:sign{Text1:""{\""text\"":\""[train %{trainsim.%player%.train}%]\""}"",Text2:""{\""text\"":\""property\""}"",Text3:""{\""text\"":\""maxspeed\""}"",Text4:""{\""text\"":\""Dust\""}""} replace"
+		set line 1 of block at location of player to "[train %{trainsim.%player%.train}%]"
+		set line 4 of block at location of player to "%{trainsim.%player%.speed}%"
+		wait 0.1 seconds
+		set block 1 east location of player to Redstone Torch
+
+command /power [<text>] [<number>] [<number>] [<number>] [<number>] [<world>]:
+	trigger:
+		if arg-3 is not set:
+			stop
+		execute player command "setblock %arg-3% %arg-4 + 50% %arg-5% minecraft:sign{Text1:""{\""text\"":\""[train %arg-1%]\""}"",Text2:""{\""text\"":\""property\""}"",Text3:""{\""text\"":\""maxspeed\""}"",Text4:""{\""text\"":\""%arg-2%\""}""} replace"
+		set block 49 up location at arg-3, arg-4, arg-5 in arg-6 to Stone
+		set block 1 east 49 up location at arg-3, arg-4, arg-5 in arg-6 to Stone
+		wait 1 tick
+		set block 1 east 50 up location at arg-3, arg-4, arg-5 in arg-6 to Redstone Torch
+		wait 1 tick
+		set block 50 up location at arg-3, arg-4, arg-5 in arg-6 to air
+		set block 1 east 50 up location at arg-3, arg-4, arg-5 in arg-6 to air
+		set block 49 up location at arg-3, arg-4, arg-5 in arg-6 to air
+		set block 1 east 49 up location at arg-3, arg-4, arg-5 in arg-6 to air
+
+command /powerex [<text>] [<number>]:
+	trigger:
+		if player is "ItzBenjyHere":
+			execute player command "setblock ~ ~ ~ minecraft:sign{Text1:""{\""text\"":\""[train %arg-1%]\""}"",Text2:""{\""text\"":\""property\""}"",Text3:""{\""text\"":\""maxspeed\""}"",Text4:""{\""text\"":\""%arg-2%\""}""} replace"
+			set block -1 up location of player to Stone
+			set block 1 east -1 up location of player to Stone
+			wait 2 tick
+			set block 1 east 0 up location of player to Redstone Torch
+			wait 1 tick
+			set block 1 east 0 up location of player to air
+			set block 0 up location of player to air
+			set block -1 up location of player to air
+			set block 1 east -1 up location of player to air
+
+
+
+command /aws [<player>] [<boolean>]:
+	trigger:
+		if arg-2 is true:
+			set {trainsim.%arg-1%.aws} to true
+		else:
+			set {trainsim.%arg-1%.aws} to false
+
+on load:
+	wait 1 tick
+	while {trainsim.loop} is true:
+		loop all players:
+			if {trainsim.%loop-player%.aws} is true:
+				set {trainsim.%loop-player%.aws.timer} to 0
+			if {trainsim.%loop-player%.aws} is true:
+				add 1 to {trainsim.%loop-player%.aws.timer}
+			if {trainsim.%loop-player%.aws.timer} is more than 9:
+				set {trainsim.%loop-player%.throttle} to -4
+				if {trainsim.%loop-player%.aws} is false:
+					if {trainsim.%loop-player%.speed} is 0:
+						set {trainsim.%loop-player%.aws.timer} to 0
+		wait 1 seconds
+
+command /cbaws [<integer>] [<integer>] [<integer>] [<world>]:
+	trigger:
+		loop all players in radius 11 of location at arg-1, arg-2, arg-3 in arg-4:
+			set {trainsim.%loop-player%.aws} to true
+
+on sign change:
+	if line 1 of event-block is "[ATO]":
+		if {ATO::*} contains line 2 of event-block:
+			cancel event
+			send "Not avaliable"
+			stop
+		add line 2 of event-block to {ATO::*}
+		send "added %line 2 of event-block%"
+		set {ATO::location::%line 2 of event-block%} to location of event-block
+		send "%{ATO::location::%line 2 of event-block%}%"
+
+on block place:
+	if line 1 of event-block is "[ATO]":
+		if {ATO::*} contains line 2 of event-block:
+			cancel event
+			send "Not avaliable"
+			stop
+		add line 2 of event-block to {ATO::*}
+		send "added %line 2 of event-block%"
+		set {ATO::location::%line 2 of event-block%} to location of event-block
+		send "%{ATO::location::%line 2 of event-block%}%"
+
+on block break:
+	if line 1 of event-block is "[ATO]":
+		remove line 2 of event-block from {ATO::*}
+		send "%{ATO::location::%line 2 of event-block%}%"
+		clear {ATO::location::%line 2 of event-block%}
+		send "removed %line 2 of event-block%"
+
+
+
+
+command /ato [<text>]:
+	trigger:
+		if arg-1 is "clear":
+			clear {ATO::*}
+
+command /atotest [<text>] [<text>]:
+	trigger:
+		set {trainsim.%player%.speed} to 0.1
+		wait 0.5 seconds
+		execute player command "train launch 10"
+		wait 0.5 seconds
+		set {trainsim.%player%.speed} to 0
+		set {trainsim.%player%.location} to event-location
+		set {trainsim.%player%.distance} to arg-1
+		if {trainsim.%player%.ato.speed} is not set:
+			set {trainsim.%player%.ato.speed} to 0
+		if arg-1 contains "sidings":
+			send "true"
+			set {trainsim.%player%.ato.speed} to 60
+		else:
+			set {trainsim.%player%.ato.speed} to 74
+		set {trainsim.%player%.ato.speed} to {trainsim.%player%.ato.speed} / 72
+		send "%{trainsim.%player%.ato.speed}%"
+		while {trainsim.%player%.speed} is less than {trainsim.%player%.ato.speed}:
+			set {trainsim.%player%.throttle} to 4
+			if {trainsim.loop} is false:
+				stop
+			wait 1 tick
+		while distance between player and {ATO::location::%arg-1%} is more than 13.5:
+			set {trainsim.%player%.speed} to {trainsim.%player%.ato.speed}
+			set {trainsim.%player%.throttle} to 0
+			if {trainsim.loop} is false:
+				stop
+			wait 1 tick
+		#if arg-1 contains "sidings":
+		#	wait 10 seconds
+		set {trainsim.%player%.location} to location of player
+		set {_temp1} to {trainsim.%player%.ato.speed} * 72
+		set {_temp2} to 0
+		set {_temp3} to 160
+		set {_temp4} to 3.6
+		set {_temp5} to ({_temp1} / {_temp4})
+		set {_temp6} to ({_temp2} * {_temp4})
+		set {_temp7} to ({_temp5} * {_temp5})
+		set {_temp8} to ({_temp6} * {_temp6})
+		set {_temp9} to ({_temp7} - {_temp8})
+		set {_temp10} to ({_temp9} / (2 * {_temp3}))
+		set {_temp11} to ({_temp10} * 3.6)
+		set {_temp12} to {_temp11} / 72
+
+		while {trainsim.%player%.speed} is not 0:
+			#send "%{_temp11}%"
+			play sound "minecraft:first" with volume 180 and pitch (({trainsim.%player%.speed}  * 15.5) / 10) + 0.5 at location of player
+			set {trainsim.%player%.throttle} to 0
+			#ssend "%distance between player and {trainsim.%player%.location}%"
+			remove ({_temp12} / 20) from {trainsim.%player%.speed}
+			wait 1 tick
+		set {trainsim.%player%.speed} to 0
+		wait 1 second
+		if arg-2 is set:
+			if {trainsim.%player%.doors.flip} is true:
+				if arg-2 is "l":
+					if {trainsim.%player%.doors.left} is false:
+						set {trainsim.%player%.doors.left} to true
+						set slot 1 of player's current inventory to Green Concrete named "Left Doors (&2Opened)"
+						play sound "minecraft:vlf.dooropen" with volume 180 at location of player 
+						wait 0.4 seconds
+						execute player command "train animate Door1 1"
+					else:
+						set {trainsim.%player%.doors.left} to false
+						set slot 1 of player's current inventory to Red Concrete named "Left Doors (&4Closed)"
+						play sound "minecraft:ann.standclear" with volume 180 at location of player
+						wait 4.4 seconds
+						play sound "minecraft:vlf.doorclose" with volume 180 at location of player
+						wait 1.7 seconds
+						execute player command "train animate Door1 -1"
+				if arg-2 is "r":
+					if {trainsim.%player%.doors.right} is false:
+						set {trainsim.%player%.doors.right} to true
+						set slot 3 of player's current inventory to Green Concrete named "Right Doors (&2Opened)"
+						play sound "minecraft:vlf.dooropen" with volume 180 at location of player 
+						wait 0.4 seconds
+						execute player command "train animate Door0 1"
+					else:
+						set {trainsim.%player%.doors.right} to false
+						set slot 3 of player's current inventory to Red Concrete named "Right Doors (&4Closed)"
+						play sound "minecraft:ann.standclear" with volume 180 at location of player
+						wait 4.4 seconds
+						play sound "minecraft:vlf.doorclose" with volume 180 at location of player 
+						wait 1.7 seconds
+						execute player command "train animate Door0 -1"
+			else if {trainsim.%player%.doors.flip} is false:
+				if arg-2 is "l":
+					if {trainsim.%player%.doors.left} is false:
+						set {trainsim.%player%.doors.left} to true
+						set slot 1 of player's current inventory to Green Concrete named "Left Doors (&2Opened)"
+						play sound "minecraft:vlf.dooropen" with volume 180 at location of player 
+						wait 0.4 seconds
+						execute player command "train animate Door0 1"
+					else:
+						set {trainsim.%player%.doors.left} to false
+						set slot 1 of player's current inventory to Red Concrete named "Left Doors (&4Closed)"
+						play sound "minecraft:ann.standclear" with volume 180 at location of player
+						wait 4.4 seconds
+						play sound "minecraft:vlf.doorclose" with volume 180 at location of player 
+						wait 1.7 seconds
+						execute player command "train animate Door0 -1"
+				if arg-2 is "r":
+					if {trainsim.%player%.doors.right} is false:
+						set {trainsim.%player%.doors.right} to true
+						set slot 3 of player's current inventory to Green Concrete named "Right Doors (&2Opened)"
+						play sound "minecraft:vlf.dooropen" with volume 180 at location of player 
+						wait 0.4 seconds
+						execute player command "train animate Door1 1"
+					else:
+						set {trainsim.%player%.doors.right} to false
+						set slot 3 of player's current inventory to Red Concrete named "Right Doors (&4Closed)"
+						play sound "minecraft:ann.standclear" with volume 180 at location of player
+						wait 4.4 seconds
+						play sound "minecraft:vlf.doorclose" with volume 180 at location of player 
+						wait 1.7 seconds
+						execute player command "train animate Door1 -1"
+
+command /kmh [<number>] [<number>] [<number>] [<number>]:
+	trigger:
+		set {_temp1} to arg-1
+		set {_temp2} to arg-2
+		set {_temp3} to arg-3
+		set {_temp4} to arg-4
+		set {_temp5} to ({_temp1} / {_temp4})
+		set {_temp6} to ({_temp2} *{_temp4})
+		set {_temp7} to ({_temp5} * {_temp5})
+		set {_temp8} to ({_temp6} * {_temp6})
+		set {_temp9} to ({_temp7} - {_temp8})
+		set {_temp10} to ({_temp9} / (2 * {_temp3}))
+		set {_temp11} to ({_temp10} * 3.6)
+		send "The answer is %{_temp10}%"
+
+
+
+on vehicle steer forward:
+	if {trainsim.%player%.running} is true:
+		if {trainsim.%player%.packet} is false:
+			set {trainsim.%player%.packet} to true
+			if {trainsim.%player%.throttle} is more than 3:
+				stop
+			else:
+				add 1 to {trainsim.%player%.throttle}
+		wait 0.2 seconds
+		set {trainsim.%player%.packet} to false
+
+on vehicle steer backward:
+	if {trainsim.%player%.running} is true:
+		if {trainsim.%player%.packet} is false:
+			set {trainsim.%player%.packet} to true
+			if {trainsim.%player%.throttle} is less than -5:
+				stop
+			else:
+				remove 1 from {trainsim.%player%.throttle}
+		wait 0.2 seconds
+		set {trainsim.%player%.packet} to false
